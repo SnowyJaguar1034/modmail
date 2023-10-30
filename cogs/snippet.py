@@ -10,10 +10,27 @@ from utils import checks, tools
 
 log = logging.getLogger(__name__)
 
+async def get_snippet(ctx, *, name: str, anon: bool):
+    async with self.bot.pool.acquire() as conn:
+        res = await conn.fetchrow(
+            "SELECT content FROM snippet WHERE name=$1 AND guild=$2", name.lower(), ctx.guild.id
+        )
+
+    if not res:
+        await ctx.send(ErrorEmbed("The snippet was not found."))
+        return
+
+    ctx.message.content = res[0]
+    await self.bot.cogs["ModMailEvents"].send_mail_mod(
+        ctx.message, ctx.prefix, anon=anon, snippet=True
+    )
+
 
 class Snippet(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    
 
     @checks.is_modmail_channel()
     @checks.in_database()
@@ -22,6 +39,8 @@ class Snippet(commands.Cog):
     @commands.guild_only()
     @commands.command(description="Use a snippet.", aliases=["s"], usage="snippet <name>")
     async def snippet(self, ctx, *, name: str):
+        await get_snippet(ctx, *, name, False)
+        """ 
         async with self.bot.pool.acquire() as conn:
             res = await conn.fetchrow(
                 "SELECT content FROM snippet WHERE name=$1 AND guild=$2", name.lower(), ctx.guild.id
@@ -34,7 +53,8 @@ class Snippet(commands.Cog):
         ctx.message.content = res[0]
         await self.bot.cogs["ModMailEvents"].send_mail_mod(
             ctx.message, ctx.prefix, anon=False, snippet=True
-        )
+        ) 
+        """
 
     @checks.is_modmail_channel()
     @checks.in_database()
@@ -45,6 +65,8 @@ class Snippet(commands.Cog):
         description="Use a snippet anonymously.", aliases=["as"], usage="asnippet <name>"
     )
     async def asnippet(self, ctx, *, name: str):
+        await get_snippet(ctx, *, name, True)
+        """ 
         async with self.bot.pool.acquire() as conn:
             res = await conn.fetchrow(
                 "SELECT content FROM snippet WHERE name=$1 AND guild=$2", name.lower(), ctx.guild.id
@@ -58,6 +80,7 @@ class Snippet(commands.Cog):
         await self.bot.cogs["ModMailEvents"].send_mail_mod(
             ctx.message, ctx.prefix, anon=True, snippet=True
         )
+        """
 
     @checks.in_database()
     @checks.is_premium()
