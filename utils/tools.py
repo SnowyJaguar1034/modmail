@@ -349,6 +349,21 @@ def get_modmail_user(channel):
 def get_modmail_channel(bot, channel):
     return create_fake_channel(bot, channel.topic.replace("ModMail Channel ", "").split(" ")[1])
 
+async def get_snippet(bot, ctx, *, name: str, anon: bool):
+    async with self.bot.pool.acquire() as conn:
+        res = await conn.fetchrow(
+            "SELECT content FROM snippet WHERE name=$1 AND guild=$2", name.lower(), ctx.guild.id
+        )
+
+    if not res:
+        await ctx.send(ErrorEmbed("The snippet was not found."))
+        return
+
+    ctx.message.content = res[0]
+    await self.bot.cogs["ModMailEvents"].send_mail_mod(
+        ctx.message, ctx.prefix, anon=anon, snippet=True
+    )
+
 
 def perm_format(perm):
     return perm.replace("_", " ").replace("guild", "server").title()
