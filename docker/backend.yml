@@ -1,0 +1,46 @@
+version: '3'
+
+networks:
+  backend:
+    name: modmail_backend
+    driver: bridge
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/web/Dockerfile
+    image: chamburr/modmail-web:latest
+    restart: unless-stopped
+    ports:
+      - '8000:6000'
+    environment:
+      - BASE_URI=${BASE_URI}
+      - HTTP_HOST=0.0.0.0
+      - HTTP_PORT=6000
+      - API_HOST=api
+      - API_PORT=6001
+    depends_on:
+      - api
+    networks:
+      - modmail_backend
+
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=modmail
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - modmail_backend
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - modmail_backend
+      
+volumes:
+  postgres:
