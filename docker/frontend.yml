@@ -148,3 +148,8 @@ services:
     restart: unless-stopped
     networks:
       - backend
+
+networks:
+  backend:
+    external:
+      name: modmail_backend
