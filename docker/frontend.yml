@@ -48,7 +48,7 @@ services:
       - BOT_API_PORT=6002
     depends_on:
       - bot
-      - modmail-backend-redis
+#      - redis
     networks:
       - backend
 
@@ -93,8 +93,8 @@ services:
       - BOD_TOKEN=
     depends_on:
       - dispatch
-      - modmail-backend-postgres
-      - modmail-backend-redis
+#      - postgres
+#      - redis
       - rabbitmq
     networks:
       - backend
@@ -138,7 +138,7 @@ services:
       - PROMETHEUS_HOST=0.0.0.0
       - PROMETHEUS_PORT=8005
     depends_on:
-      - modmail-backend-redis
+#      - redis
       - rabbitmq
     networks:
       - backend
