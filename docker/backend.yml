@@ -34,13 +34,13 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
     networks:
-      - modmail_backend
+      - backend
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
     networks:
-      - modmail_backend
+      - backend
       
 volumes:
   postgres:
