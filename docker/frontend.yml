@@ -17,6 +17,8 @@ services:
       - API_PORT=6001
     depends_on:
       - api
+    networks:
+      - backend
 
   api:
     build:
@@ -48,7 +50,7 @@ services:
       - bot
       - redis
     networks:
-      - modmail_backend
+      - backend
 
   bot:
     build:
@@ -95,7 +97,7 @@ services:
       - redis
       - rabbitmq
     networks:
-      - modmail_backend
+      - backend
 
   dispatch:
     image: chamburr/twilight-dispatch:latest
@@ -139,10 +141,10 @@ services:
       - redis
       - rabbitmq
     networks:
-      - modmail_backend
+      - backend
 
   rabbitmq:
     image: rabbitmq:3-alpine
     restart: unless-stopped
     networks:
-      - modmail_backend
+      - backend
