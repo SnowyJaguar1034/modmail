@@ -18,7 +18,7 @@ services:
     depends_on:
       - api
     networks:
-      - backend
+      - modmail_backend
 
   api:
     build:
@@ -50,7 +50,7 @@ services:
       - bot
 #      - redis
     networks:
-      - backend
+      - modmail_backend
 
   bot:
     build:
@@ -97,7 +97,7 @@ services:
 #      - redis
       - rabbitmq
     networks:
-      - backend
+      - modmail_backend
 
   dispatch:
     image: chamburr/twilight-dispatch:latest
@@ -141,13 +141,13 @@ services:
 #      - redis
       - rabbitmq
     networks:
-      - backend
+      - modmail_backend
 
   rabbitmq:
     image: rabbitmq:3-alpine
     restart: unless-stopped
     networks:
-      - backend
+      - modmail_backend
 
 networks:
   backend:
