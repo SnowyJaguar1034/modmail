@@ -150,5 +150,5 @@ services:
       - modmail_backend
 
 networks:
-  backend:
+  modmail_backend:
     external: true
