@@ -46,3 +46,4 @@ services:
       
 volumes:
   postgres:
+# rabbitmqctl add_vhost qa1
