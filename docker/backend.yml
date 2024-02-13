@@ -39,6 +39,8 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    command:
+      bash -c "redis-server -p 6380 & redis-server -p 6381 & redis-server -p 6379 &"
     networks:
       - backend
       
