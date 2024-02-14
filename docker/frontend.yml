@@ -9,7 +9,7 @@ services:
     container_name: ${BOT_NAME}-web
     restart: unless-stopped
     ports:
-      - '8000:6000'
+      - ${WEB_PORT}:6000
     environment:
       - BASE_URI=${BASE_URI}
       - HTTP_HOST=0.0.0.0
