@@ -28,6 +28,7 @@ services:
   postgres:
     image: postgres:15-alpine
     restart: unless-stopped
+    container_name: postgres
     environment:
       - POSTGRES_DB=modmail
       - POSTGRES_HOST_AUTH_METHOD=trust
@@ -39,6 +40,7 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    container_name: redis
     command:
       sh -c "redis-server -p 6380 & redis-server -p 6381 & redis-server -p 6379 &"
     networks:
