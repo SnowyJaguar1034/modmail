@@ -13,7 +13,7 @@ services:
     environment:
       - BASE_URI=${BASE_URI}
       - HTTP_HOST=0.0.0.0
-      - HTTP_PORT=6000
+      - HTTP_PORT=${HTTP_PORT}
       - API_HOST=api
       - API_PORT=6001
     depends_on:
