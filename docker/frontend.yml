@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  web:
+  ${BOT_NAME}-web:
     build:
       context: ..
       dockerfile: docker/web/Dockerfile
@@ -21,7 +21,7 @@ services:
     networks:
       - modmail_backend
 
-  api:
+  ${BOT_NAME}-api:
     build:
       context: ..
       dockerfile: docker/api/Dockerfile
@@ -54,7 +54,7 @@ services:
     networks:
       - modmail_backend
 
-  bot:
+  ${BOT_NAME}-bot:
     build:
       context: ..
       dockerfile: docker/bot/Dockerfile
@@ -102,7 +102,7 @@ services:
     networks:
       - modmail_backend
 
-  dispatch:
+  ${BOT_NAME}-dispatch:
     image: chamburr/twilight-dispatch:latest
     container_name: ${BOT_NAME}-dispatch
     restart: unless-stopped
@@ -147,7 +147,7 @@ services:
     networks:
       - modmail_backend
 
-  rabbitmq:
+  ${BOT_NAME}-rabbitmq:
     image: rabbitmq:3-alpine
     container_name: ${BOT_NAME}-rabbitmq
     restart: unless-stopped
