@@ -1,12 +1,12 @@
 version: '3'
 
 services:
-  ${BOT_NAME}-web:
+ web:
     build:
       context: ..
       dockerfile: docker/web/Dockerfile
     image: chamburr/modmail-web:latest
-    #container_name: ${BOT_NAME}-web
+    container_name: ${BOT_NAME}-web
     restart: unless-stopped
     ports:
       - '8000:6000'
@@ -17,16 +17,16 @@ services:
       - API_HOST=api
       - API_PORT=6001
     depends_on:
-      - ${BOT_NAME}-api
+      - api
     networks:
       - modmail_backend
 
-  ${BOT_NAME}-api:
+  api:
     build:
       context: ..
       dockerfile: docker/api/Dockerfile
     image: chamburr/modmail-api:latest
-    #container_name: ${BOT_NAME}-api
+    container_name: ${BOT_NAME}-api
     restart: unless-stopped
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
@@ -49,17 +49,17 @@ services:
       - BOT_API_HOST=bot
       - BOT_API_PORT=6002
     depends_on:
-      - ${BOT_NAME}-bot
+      - bot
 #      - redis
     networks:
       - modmail_backend
 
-  ${BOT_NAME}-bot:
+  bot:
     build:
       context: ..
       dockerfile: docker/bot/Dockerfile
     image: chamburr/modmail-bot:latest
-    #container_name: ${BOT_NAME}-bot
+    container_name: ${BOT_NAME}-bot
     restart: unless-stopped
     environment:
       - ENVIRONMENT=development
@@ -95,16 +95,16 @@ services:
       - DBL_TOKEN=
       - BOD_TOKEN=
     depends_on:
-      - ${BOT_NAME}-dispatch
+      - dispatch
 #      - postgres
 #      - redis
-      - ${BOT_NAME}-rabbitmq
+      - rabbitmq
     networks:
       - modmail_backend
 
-  ${BOT_NAME}-dispatch:
+  dispatch:
     image: chamburr/twilight-dispatch:latest
-    #container_name: ${BOT_NAME}-dispatch
+    container_name: ${BOT_NAME}-dispatch
     restart: unless-stopped
     environment:
       - RUST_LOG=info
@@ -143,13 +143,13 @@ services:
       - PROMETHEUS_PORT=8005
     depends_on:
 #      - redis
-      - ${BOT_NAME}-rabbitmq
+      - rabbitmq
     networks:
       - modmail_backend
 
-  ${BOT_NAME}-rabbitmq:
+  rabbitmq:
     image: rabbitmq:3-alpine
-    #container_name: ${BOT_NAME}-rabbitmq
+    container_name: ${BOT_NAME}-rabbitmq
     restart: unless-stopped
     networks:
       - modmail_backend
