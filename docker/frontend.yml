@@ -154,6 +154,6 @@ services:
     networks:
       - modmail_backend
 
-networks:
-  modmail_backend:
-    external: true
+#networks:
+#  modmail_backend:
+#    external: true
