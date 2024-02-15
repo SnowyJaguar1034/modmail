@@ -1,9 +1,9 @@
 version: '3'
 
-networks:
-  backend:
-    name: modmail_backend
-    driver: bridge
+#networks:
+#  backend:
+#    name: modmail_backend
+#    driver: bridge
 
 services:
   postgres:
