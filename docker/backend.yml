@@ -1,9 +1,8 @@
 version: '3'
 
-#networks:
-#  backend:
-#    name: modmail_backend
-#    driver: bridge
+networks:
+  modmail_backend:
+    external: true
 
 services:
   postgres:
@@ -15,8 +14,8 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
       - postgres:/var/lib/postgresql/data
-#    networks:
-#      - backend
+    networks:
+      - backend
 
   redis:
     image: redis:7-alpine
@@ -24,8 +23,8 @@ services:
     container_name: redis
     command:
       sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6379 &"
-#    networks:
-#      - backend
+    networks:
+      - backend
 
   #  web:
 #    build:
