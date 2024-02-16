@@ -34,7 +34,7 @@ services:
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - postgres
+      - modmail_backend
       - host
     restart: unless-stopped
 
