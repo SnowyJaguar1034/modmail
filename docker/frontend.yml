@@ -161,3 +161,11 @@ services:
       - modmail_backend
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    container_name: ${BOT_NAME}-redis
+#    command:
+#      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
+    networks:
+      - modmail_backend
