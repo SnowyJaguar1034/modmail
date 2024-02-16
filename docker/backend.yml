@@ -4,8 +4,6 @@ networks:
   modmail_backend:
     name: modmail_backend
     external: true
-  host:
-    external: true
 
 services:
 
@@ -20,6 +18,8 @@ services:
        - postgres:/data/postgres
     ports:
       - "5433:5432"
+     expose:
+      - "5433"
     networks:
       - modmail_backend
     restart: unless-stopped
@@ -35,9 +35,10 @@ services:
        - pgadmin:/var/lib/pgadmin
     ports:
       - "${PGADMIN_PORT:-5050}:80"
-    networks:
-      - modmail_backend
-      - host
+     network_mode: "host"
+    #networks:
+      #- modmail_backend
+      #- host
     restart: unless-stopped
 
 volumes:
