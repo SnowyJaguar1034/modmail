@@ -21,7 +21,7 @@ services:
       - BASE_URI=${BASE_URI}
       - HTTP_HOST=0.0.0.0
       - HTTP_PORT=${HTTP_PORT}
-      - API_HOST=${BOT_NAME}-api
+      - API_HOST=api
       - API_PORT=6001
     depends_on:
       - api
@@ -45,7 +45,7 @@ services:
       - PREMIUM5_ROLE=0
       - PAYMENT_CHANNEL=0
       - PATRON_CHANNEL=0
-      - REDIS_HOST=${BOT_NAME}-redis
+      - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=
       - BASE_URI=${BASE_URI}
@@ -142,11 +142,11 @@ services:
       - STATE_EMOJI=false
       - STATE_VOICE=false
       - STATE_OLD=false
-      - RABBIT_HOST=${BOT_NAME}-rabbitmq
+      - RABBIT_HOST=rabbitmq
       - RABBIT_PORT=5672
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=guest
-      - REDIS_HOST=${BOT_NAME}-redis
+      - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT}
       - PROMETHEUS_HOST=0.0.0.0
       - PROMETHEUS_PORT=8005
