@@ -26,26 +26,7 @@ services:
 #      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
     networks:
       - modmail_backend
-
-  #  web:
-#    build:
-#      context: ..
-#      dockerfile: docker/web/Dockerfile
-#    image: chamburr/modmail-web:latest
-#    restart: unless-stopped
-#    ports:
-#      - '8000:6000'
-#    environment:
-#      - BASE_URI=${BASE_URI}
-#      - HTTP_HOST=0.0.0.0
-#      - HTTP_PORT=6000
-#      - API_HOST=api
-#      - API_PORT=6001
-#    depends_on:
-#      - api
-#    networks:
-#      - modmail_backend    
-      
+ 
 volumes:
   postgres:
 # rabbitmqctl add_vhost qa1
