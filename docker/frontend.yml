@@ -46,7 +46,7 @@ services:
       - PAYMENT_CHANNEL=0
       - PATRON_CHANNEL=0
       - REDIS_HOST=redis
-      - REDIS_PORT=$REDIS_PORT}
+      - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=
       - BASE_URI=${BASE_URI}
       - API_HOST=0.0.0.0
