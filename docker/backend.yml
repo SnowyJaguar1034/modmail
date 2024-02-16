@@ -4,6 +4,9 @@ networks:
   modmail_backend:
     name: modmail_backend
     external: true
+  host:
+    name: host
+    external: true
 
 services:
 
