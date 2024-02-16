@@ -18,14 +18,14 @@ services:
     networks:
       - modmail_backend
 
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    container_name: redis
+#  redis:
+#    image: redis:7-alpine
+#    restart: unless-stopped
+#    container_name: redis
 #    command:
 #      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
-    networks:
-      - modmail_backend
+#    networks:
+#      - modmail_backend
  
 volumes:
   postgres:
