@@ -24,7 +24,7 @@ services:
       - API_HOST=${BOT_NAME}-api
       - API_PORT=6001
     depends_on:
-      - ${BOT_NAME}-api
+      - api
   
   api:
     build:
@@ -56,8 +56,8 @@ services:
       - BOT_API_HOST=bot
       - BOT_API_PORT=6002
     depends_on:
-      - ${BOT_NAME}-bot
-      - ${BOT_NAME}-redis
+      - bot
+      - redis
 
   bot:
     build:
@@ -104,10 +104,10 @@ services:
       - DBL_TOKEN=
       - BOD_TOKEN=
     depends_on:
-      - ${BOT_NAME}-dispatch
+      - dispatch
 #      - postgres
-      - ${BOT_NAME}-redis
-      - ${BOT_NAME}-rabbitmq
+      - redis
+      - rabbitmq
 
   dispatch:
     image: chamburr/twilight-dispatch:latest
@@ -151,12 +151,12 @@ services:
       - PROMETHEUS_HOST=0.0.0.0
       - PROMETHEUS_PORT=8005
     depends_on:
-      - ${BOT_NAME}-redis
-      - ${BOT_NAME}-rabbitmq
+      - redis
+      - rabbitmq
 
   rabbitmq:
     image: rabbitmq:3-alpine
-    container_name: ${BOT_NAME}-rabbitmq
+    container_name: rabbitmq
     networks:
       - modmail_backend
     restart: unless-stopped
@@ -164,7 +164,7 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    container_name: ${BOT_NAME}-redis
+    container_name: redis
 #    command:
 #      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
     networks:
