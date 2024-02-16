@@ -1,6 +1,9 @@
 version: "3"
 
 networks:
+  backend:
+    driver: bridge
+    name: backend
   modmail_backend:
     name: modmail_backend
     external: true
@@ -20,6 +23,7 @@ services:
       - "5432:5432"
     networks:
       - modmail_backend
+      - backend
     restart: unless-stopped
   
   pgadmin:
