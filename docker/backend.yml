@@ -2,6 +2,7 @@ version: '3'
 
 networks:
   modmail_backend:
+    name: modmail_backend
     external: true
 
 services:
