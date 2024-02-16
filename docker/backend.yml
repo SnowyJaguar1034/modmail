@@ -17,6 +17,8 @@ services:
       - postgres:/var/lib/postgresql/data
     networks:
       - modmail_backend
+    ports:
+      - 5433:6000
 
 #  redis:
 #    image: redis:7-alpine
