@@ -38,7 +38,6 @@ services:
 #    network_mode: "host"
     networks:
       - modmail_backend
-      - host
     restart: unless-stopped
 
 volumes:
