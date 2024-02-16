@@ -4,6 +4,9 @@ networks:
   modmail_backend:
     name: modmail_backend2
     external: true
+  ${BOT_NAME}:
+    driver: bridge
+    name: ${BOT_NAME}
 
 services:
   web:
@@ -13,7 +16,7 @@ services:
     image: chamburr/modmail-web:latest
     container_name: ${BOT_NAME}-web
     networks:
-      - modmail_backend
+      - ${BOT_NAME}
     restart: unless-stopped
     ports:
       - ${WEB_PORT}:6000
@@ -33,7 +36,7 @@ services:
     image: chamburr/modmail-api:latest
     container_name: ${BOT_NAME}-api
     networks:
-      - modmail_backend
+      - ${BOT_NAME}
     restart: unless-stopped
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
@@ -67,6 +70,7 @@ services:
     container_name: ${BOT_NAME}-bot
     networks:
       - modmail_backend
+      - ${BOT_NAME}
     restart: unless-stopped
     #volumes:
     #  - /home/plugins:/plugins
@@ -113,7 +117,7 @@ services:
     image: chamburr/twilight-dispatch:latest
     container_name: ${BOT_NAME}-dispatch
     networks:
-      - modmail_backend
+      - ${BOT_NAME}
     restart: unless-stopped
     environment:
       - RUST_LOG=info
@@ -158,7 +162,7 @@ services:
     image: rabbitmq:3-alpine
     container_name: ${BOT_NAME}-rabbitmq
     networks:
-      - modmail_backend
+      - ${BOT_NAME}
     restart: unless-stopped
 
   redis:
@@ -168,4 +172,4 @@ services:
 #    command:
 #      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
     networks:
-      - modmail_backend
+      - ${BOT_NAME}
