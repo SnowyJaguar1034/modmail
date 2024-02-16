@@ -22,8 +22,8 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     container_name: redis
-    command:
-      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
+#    command:
+#      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
     networks:
       - modmail_backend
 
