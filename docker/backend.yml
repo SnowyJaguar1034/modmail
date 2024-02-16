@@ -20,15 +20,6 @@ services:
     ports:
       - 5433:6000
 
-#  redis:
-#    image: redis:7-alpine
-#    restart: unless-stopped
-#    container_name: redis
-#    command:
-#      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
-#    networks:
-#      - modmail_backend
-
  pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
