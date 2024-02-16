@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 networks:
   modmail_backend:
@@ -6,6 +6,7 @@ networks:
     external: true
 
 services:
+  
   postgres:
     image: postgres:15-alpine
     restart: unless-stopped
@@ -19,22 +20,21 @@ services:
       - modmail_backend
     ports:
       - 5433:6000
-
- pgadmin:
+  
+  pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
-       - pgadmin:/var/lib/pgadmin
+      - pgadmin:/var/lib/pgadmin
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      - ${PGADMIN_PORT:-5050}:80
     networks:
       - modmail_backend
     restart: unless-stopped
-
 
 volumes:
   postgres:
