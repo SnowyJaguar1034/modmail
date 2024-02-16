@@ -22,7 +22,7 @@ services:
     ports:
       - "5433:5432"
     networks:
-      - postgres
+      - modmail_backend
     restart: unless-stopped
   
   pgadmin:
