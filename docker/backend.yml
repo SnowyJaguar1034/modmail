@@ -18,7 +18,7 @@ services:
        - postgres:/data/postgres
     ports:
       - "5433:5432"
-     expose:
+    expose:
       - "5433"
     networks:
       - modmail_backend
@@ -35,7 +35,7 @@ services:
        - pgadmin:/var/lib/pgadmin
     ports:
       - "${PGADMIN_PORT:-5050}:80"
-     network_mode: "host"
+    network_mode: "host"
     #networks:
       #- modmail_backend
       #- host
