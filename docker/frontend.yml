@@ -21,10 +21,10 @@ services:
       - BASE_URI=${BASE_URI}
       - HTTP_HOST=0.0.0.0
       - HTTP_PORT=${HTTP_PORT}
-      - API_HOST=api
+      - API_HOST=${BOT_NAME}-api
       - API_PORT=6001
     depends_on:
-      - api
+      - ${BOT_NAME}-api
   
   api:
     build:
@@ -45,7 +45,7 @@ services:
       - PREMIUM5_ROLE=0
       - PAYMENT_CHANNEL=0
       - PATRON_CHANNEL=0
-      - REDIS_HOST=redis
+      - REDIS_HOST=${BOT_NAME}-redis
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=
       - BASE_URI=${BASE_URI}
@@ -56,8 +56,8 @@ services:
       - BOT_API_HOST=bot
       - BOT_API_PORT=6002
     depends_on:
-      - bot
-#      - redis
+      - ${BOT_NAME}-bot
+      - ${BOT_NAME}-redis
 
   bot:
     build:
@@ -104,10 +104,10 @@ services:
       - DBL_TOKEN=
       - BOD_TOKEN=
     depends_on:
-      - dispatch
+      - ${BOT_NAME}-dispatch
 #      - postgres
-#      - redis
-      - rabbitmq
+      - ${BOT_NAME}-redis
+      - ${BOT_NAME}-rabbitmq
 
   dispatch:
     image: chamburr/twilight-dispatch:latest
@@ -142,17 +142,17 @@ services:
       - STATE_EMOJI=false
       - STATE_VOICE=false
       - STATE_OLD=false
-      - RABBIT_HOST=rabbitmq
+      - RABBIT_HOST=${BOT_NAME}-rabbitmq
       - RABBIT_PORT=5672
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=guest
-      - REDIS_HOST=redis
+      - REDIS_HOST=${BOT_NAME}-redis
       - REDIS_PORT=${REDIS_PORT}
       - PROMETHEUS_HOST=0.0.0.0
       - PROMETHEUS_PORT=8005
     depends_on:
-#      - redis
-      - rabbitmq
+      - ${BOT_NAME}-redis
+      - ${BOT_NAME}-rabbitmq
 
   rabbitmq:
     image: rabbitmq:3-alpine
