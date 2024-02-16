@@ -6,20 +6,21 @@ networks:
     external: true
 
 services:
-  
+
   postgres:
-    image: postgres:15-alpine
-    restart: unless-stopped
     container_name: postgres
+    image: postgres
     environment:
-      - POSTGRES_DB=modmail
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
     volumes:
-      - postgres:/var/lib/postgresql/data
-    networks:
-      - modmail_backend
+       - postgres:/data/postgres
     ports:
-      - 5433:6000
+      - "5432:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
   
   pgadmin:
     container_name: pgadmin
@@ -27,16 +28,17 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
-      - pgadmin:/var/lib/pgadmin
+       - pgadmin:/var/lib/pgadmin
     ports:
-      - ${PGADMIN_PORT:-5050}:80
+      - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - modmail_backend
+      - postgres
     restart: unless-stopped
 
 volumes:
-  postgres:
-  pgadmin:
+    postgres:
+    pgadmin:
+  
 # rabbitmqctl add_vhost qa1
