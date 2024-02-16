@@ -67,6 +67,8 @@ services:
     networks:
       - modmail_backend
     restart: unless-stopped
+    volumes:
+      - /home/plugins:/plugins
     environment:
       - ENVIRONMENT=development
       - BOT_TOKEN=${BOT_TOKEN}
