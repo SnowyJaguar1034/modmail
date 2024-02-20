@@ -89,6 +89,7 @@ services:
       - API_PORT=6001
       - API_WORKERS=1
       - API_SECRET=${API_SECRET}
+      - BOT_API_HOST=
     depends_on:
       - cache
   
