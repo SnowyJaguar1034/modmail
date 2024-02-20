@@ -69,6 +69,7 @@ services:
     container_name: logfetcher
     networks:
       - modmail_backend
+      - default
     restart: unless-stopped
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
@@ -90,7 +91,13 @@ services:
       - API_SECRET=${API_SECRET}
     depends_on:
       - redis
-
+  
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    container_name: ${BOT_NAME}-redis
+    networks:
+      - default
 volumes:
     postgres:
     pgadmin:
