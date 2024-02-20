@@ -4,9 +4,9 @@ networks:
   backend:
     driver: bridge
     name: backend
-  modmail_backend:
-    name: modmail_backend
-    external: true
+  default:
+    driver: bridge
+    name: internal
 
 services:
 
@@ -22,7 +22,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - modmail_backend
+      - defualt
       - backend
     restart: unless-stopped
   
@@ -38,7 +38,7 @@ services:
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - modmail_backend
+      - defualt
     restart: unless-stopped
 
   logviewer:
@@ -48,7 +48,7 @@ services:
     image: chamburr/modmail-web:latest
     container_name: logviewer
     networks:
-      - modmail_backend
+      - backend
     restart: unless-stopped
     ports:
       - ${WEB_PORT}:6000
@@ -59,7 +59,7 @@ services:
       - API_HOST=logviewer
       - API_PORT=6001
     depends_on:
-      - api
+      - logfetcher
   
   logfetcher:
     build:
@@ -68,8 +68,8 @@ services:
     image: chamburr/modmail-api:latest
     container_name: logfetcher
     networks:
-      - modmail_backend
-      - default
+      - backend
+      - defualt
     restart: unless-stopped
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
@@ -90,14 +90,15 @@ services:
       - API_WORKERS=1
       - API_SECRET=${API_SECRET}
     depends_on:
-      - redis
+      - cache
   
-  redis:
+  cache:
     image: redis:7-alpine
     restart: unless-stopped
-    container_name: ${BOT_NAME}-redis
+    container_name: cache
     networks:
       - default
+
 volumes:
     postgres:
     pgadmin:
