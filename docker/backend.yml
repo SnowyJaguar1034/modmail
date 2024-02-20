@@ -41,6 +41,56 @@ services:
       - modmail_backend
     restart: unless-stopped
 
+  logviewer:
+    build:
+      context: ..
+      dockerfile: docker/web/Dockerfile
+    image: chamburr/modmail-web:latest
+    container_name: logviewer
+    networks:
+      - modmail_backend
+    restart: unless-stopped
+    ports:
+      - ${WEB_PORT}:6000
+    environment:
+      - BASE_URI=${BASE_URI}
+      - HTTP_HOST=0.0.0.0
+      - HTTP_PORT=${HTTP_PORT}
+      - API_HOST=logviewer
+      - API_PORT=6001
+    depends_on:
+      - api
+  
+  logfetcher:
+    build:
+      context: ..
+      dockerfile: docker/api/Dockerfile
+    image: chamburr/modmail-api:latest
+    container_name: logfetcher
+    networks:
+      - modmail_backend
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - BOT_CLIENT_ID=${BOT_CLIENT_ID}
+      - BOT_CLIENT_SECRET=${BOT_CLIENT_SECRET}
+      - MAIN_SERVER=0
+      - PREMIUM1_ROLE=0
+      - PREMIUM3_ROLE=0
+      - PREMIUM5_ROLE=0
+      - PAYMENT_CHANNEL=0
+      - PATRON_CHANNEL=0
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=
+      - BASE_URI=${BASE_URI}
+      - API_HOST=0.0.0.0
+      - API_PORT=6001
+      - API_WORKERS=1
+      - API_SECRET=${API_SECRET}
+    depends_on:
+      - redis
+
 volumes:
     postgres:
     pgadmin:
