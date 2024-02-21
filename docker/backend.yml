@@ -52,8 +52,8 @@ services:
     restart: unless-stopped
     ports:
       - ${WEB_PORT}:6000
-      - 80:80
-      - 444:443
+      - 8080:80
+      - 8444:443
     environment:
       - BASE_URI=${BASE_URI}
       - HTTP_HOST=0.0.0.0
@@ -113,7 +113,7 @@ services:
       # These ports are in format <host-port>:<container-port>
       - '80:80' # Public HTTP Port
       - '443:443' # Public HTTPS Port
-      - '81:81' # Admin Web Port
+      - '8843:81' # Admin Web Port
       # Add any other Stream port you want to expose
       # - '21:21' # FTP
     # Uncomment the next line if you uncomment anything in the section
