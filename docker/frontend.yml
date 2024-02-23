@@ -8,6 +8,12 @@ networks:
     driver: bridge
     name: private-${BOT_NAME}
 
+volumes:
+    rabbitmq:
+      name: ${BOT_NAME}-rabbitmq
+    redis:
+      name: &{BOT_NAME}-redis
+      
 services:
 #  web:
 #    build:
@@ -164,11 +170,15 @@ services:
     networks:
       - private
     restart: unless-stopped
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    container_name: ${BOT_NAME}-redis
+    volumes:
+      - redis:/data
+    container_name: redis
 #    command:
 #      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
     networks:
