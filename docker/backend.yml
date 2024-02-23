@@ -149,7 +149,8 @@ services:
     ports:
         - '7880:7880'
     volumes:
-        - goaccess:/opt/log
+        - goaccess_log:/opt/log
+        - goaccess_custom:/opt/custom
 
 volumes:
     postgres:
@@ -160,8 +161,10 @@ volumes:
       name: npm_data
     npm_letsencrypt:
       name: npm_letsencrypt
-    goaccess:
-      name: goaccess
+    goaccess_log:
+      name: goaccess_log
+    goaccess_custom:
+      name: goaccess_custom
     cache:
       name: cache
     logfetcher:
