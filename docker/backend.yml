@@ -55,6 +55,8 @@ services:
       - private
       - public
     restart: unless-stopped
+#    volumes:
+#      - logviewer
     ports:
       - ${WEB_PORT}:6000
       - 8800:80
@@ -77,6 +79,8 @@ services:
     networks:
       - private
     restart: unless-stopped
+#    volumes:
+#      - logfetcher
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
       - BOT_CLIENT_ID=${BOT_CLIENT_ID}
@@ -104,6 +108,8 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     container_name: cache
+    volumes:
+      - cache:/data
     networks:
       - private
      
@@ -143,13 +149,25 @@ services:
     ports:
         - '7880:7880'
     volumes:
-        - npm_logs:/opt/log
+        - goaccess:/opt/log
 
 volumes:
     postgres:
+      name: postgres
     pgadmin:
+      name: pgadmin
     npm_data:
+      name: npm_data
     npm_letsencrypt:
-    npm_logs:
+      name: npm_letsencrypt
+    goaccess:
+      name: goaccess
+    cache:
+      name: cache
+    logfetcher:
+      name: logfetcher
+    logviewer:
+      name: logviewer
+    
   
 # rabbitmqctl add_vhost qa1
