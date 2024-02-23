@@ -4,9 +4,9 @@ networks:
   backend:
     driver: bridge
     name: backend
-  default:
+  backend:
     driver: bridge
-    name: internal
+    name: backend
   public:
    name: public
 
@@ -88,7 +88,7 @@ services:
       - PREMIUM5_ROLE=0
       - PAYMENT_CHANNEL=0
       - PATRON_CHANNEL=0
-      - REDIS_HOST=redis
+      - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=
       - BASE_URI=${BASE_URI}
