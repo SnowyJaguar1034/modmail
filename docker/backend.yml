@@ -1,10 +1,10 @@
 version: "3"
 
 networks:
-  backend:
+  postgres:
     driver: bridge
-    name: backend
-  backend:
+    name: postgres
+  private:
     driver: bridge
     name: backend
   public:
@@ -25,8 +25,8 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - default
-      - backend
+      - postgres
+      - private
     restart: unless-stopped
   
   pgadmin:
@@ -41,7 +41,7 @@ services:
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - default
+      - postgres
       - public
     restart: unless-stopped
 
@@ -52,7 +52,7 @@ services:
     image: chamburr/modmail-web:latest
     container_name: logviewer
     networks:
-      - backend
+      - private
       - public
     restart: unless-stopped
     ports:
@@ -75,8 +75,7 @@ services:
     image: chamburr/modmail-api:latest
     container_name: logfetcher
     networks:
-      - backend
-      - default
+      - private
     restart: unless-stopped
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
@@ -106,7 +105,7 @@ services:
     restart: unless-stopped
     container_name: cache
     networks:
-      - default
+      - private
      
 
   npm:
