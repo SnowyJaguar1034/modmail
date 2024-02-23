@@ -178,7 +178,7 @@ services:
     restart: unless-stopped
     volumes:
       - redis:/data
-    container_name: redis
+    container_name: ${BOT_NAME}-redis
 #    command:
 #      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
     networks:
