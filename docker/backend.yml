@@ -27,7 +27,6 @@ services:
       - "5432:5432"
     networks:
       - postgres
-      - private
     restart: unless-stopped
   
   pgadmin:
