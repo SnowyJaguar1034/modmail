@@ -6,9 +6,10 @@ networks:
     name: postgres
   private:
     driver: bridge
-    name: backend
+    name: private
   public:
    name: public
+   driver: bridge
 
 
 services:
