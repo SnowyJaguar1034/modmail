@@ -12,7 +12,7 @@ volumes:
     rabbitmq:
       name: ${BOT_NAME}-rabbitmq
     redis:
-      name: &{BOT_NAME}-redis
+      name: ${BOT_NAME}-redis
       
 services:
 #  web:
