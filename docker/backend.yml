@@ -107,7 +107,7 @@ services:
   cache:
     image: redis:7-alpine
     restart: unless-stopped
-    container_name: cache
+    container_name: ${REDIS_HOST}
     volumes:
       - cache:/data
     networks:
