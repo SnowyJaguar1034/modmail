@@ -64,7 +64,7 @@ services:
     environment:
       - BASE_URI=${BASE_URI}
       - HTTP_HOST="${HTTP_HOST:-0.0.0.0}"
-      - HTTP_PORT=${HTTP_PORT}
+      - HTTP_PORT="${INTERANL_HTTP_PORT:-6000}:6000"
       - API_HOST=logviewer
       - API_PORT="${INTERNAL_API_PORT:-6001}"
     depends_on:
