@@ -11,9 +11,9 @@ networks:
 
 volumes:
     rabbitmq:
-      name: ${BOT_NAME}-rabbitmq
+      name: rabbitmq-${BOT_NAME}
     redis:
-      name: ${BOT_NAME}-redis
+      name: redis-${BOT_NAME}
       
 services:
   bot:
@@ -21,7 +21,7 @@ services:
       context: ..
       dockerfile: docker/bot/Dockerfile
     image: chamburr/modmail-bot:latest
-    container_name: ${BOT_NAME}-bot
+    container_name: bot-${BOT_NAME}
     networks:
       - postgres
       - private
@@ -47,7 +47,7 @@ services:
       - POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-changeme}"
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT="${POSTGRES_PORT:-5432}"
-      - REDIS_HOST=cache
+      - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=
       - RABBIT_USERNAME=guest
@@ -69,7 +69,7 @@ services:
 
   dispatch:
     image: chamburr/twilight-dispatch:latest
-    container_name: ${BOT_NAME}-dispatch
+    container_name: dispatch-${BOT_NAME}
     networks:
       - private
     restart: unless-stopped
@@ -114,7 +114,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-alpine
-    container_name: ${BOT_NAME}-rabbitmq
+    container_name: rabbitmq-${BOT_NAME}
     networks:
       - private
     restart: unless-stopped
@@ -126,7 +126,7 @@ services:
     restart: unless-stopped
     volumes:
       - redis:/data
-    container_name: ${BOT_NAME}-redis
+    container_name: redis-${BOT_NAME}
 #    command:
 #      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
     networks:
