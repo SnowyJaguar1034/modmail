@@ -1,5 +1,5 @@
 version: '3'
-name: ${BOT_NAME}-stack
+name: "${BOT_NAME}-stack"
 
 networks:
   postgres:
