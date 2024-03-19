@@ -59,8 +59,6 @@ services:
 #      - logviewer
     ports:
       - "${EXTERNAL_WEB_PORT:-6060}:6000"
-      - "${EXTERNAL_HTTP_PORT:-8080}:80"
-      - "${EXTERNAL_HTTPS_PORT:-8443}:443"
     environment:
       - BASE_URI=${BASE_URI}
       - HTTP_HOST="${HTTP_HOST:-0.0.0.0}"
