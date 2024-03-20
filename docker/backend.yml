@@ -24,7 +24,7 @@ services:
     volumes:
        - postgres:/data/postgres
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - ${POSTGRES_PORT:-5432}:5432
     networks:
       - postgres
     restart: unless-stopped
@@ -39,7 +39,7 @@ services:
     volumes:
        - pgadmin:/var/lib/pgadmin
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      - ${PGADMIN_PORT:-5050}:80
     networks:
       - postgres
       - public
@@ -58,13 +58,13 @@ services:
 #    volumes:
 #      - logviewer
     ports:
-      - "${EXTERNAL_WEB_PORT:-6060}:6000"
+      - ${EXTERNAL_WEB_PORT:-6060}:6000
     environment:
       - BASE_URI=${BASE_URI}
-      - HTTP_HOST="${HTTP_HOST:-0.0.0.0}"
-      - HTTP_PORT="${INTERANL_HTTP_PORT:-6000}:6000"
+      - HTTP_HOST=${HTTP_HOST:-0.0.0.0}
+      - HTTP_PORT=${INTERANL_HTTP_PORT:-6000}:6000
       - API_HOST=logviewer
-      - API_PORT="${INTERNAL_API_PORT:-6001}"
+      - API_PORT=${INTERNAL_API_PORT:-6001}
     depends_on:
       - logfetcher
   
@@ -93,8 +93,8 @@ services:
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - BASE_URI=${BASE_URI}
-      - API_HOST="${HTTP_HOST:-0.0.0.0}"
-      - API_PORT="${INTERNAL_API_PORT:-6001}"
+      - API_HOST=${HTTP_HOST:-0.0.0.0}
+      - API_PORT=${INTERNAL_API_PORT:-6001}
       - API_WORKERS=1
       - API_SECRET=${API_SECRET}
       - BOT_API_HOST=${BOT_API_HOST}
@@ -120,9 +120,9 @@ services:
       - public
     ports:
       # These ports are in format <host-port>:<container-port>
-      - "${NPM_HTTP_PORT:-80}:80" # Public HTTP Port
-      - "${NPM_HTTPS_PORT:-443}:443" # Public HTTPS Port
-      - "${NPM_HTTP_PORT:-81}:81" # Admin Web Port
+      - ${NPM_HTTP_PORT:-80}:80 # Public HTTP Port
+      - ${NPM_HTTPS_PORT:-443}:443 # Public HTTPS Port
+      - ${NPM_HTTP_PORT:-81}:81 # Admin Web Port
       # Add any other Stream port you want to expose
       # - '21:21' # FTP
     # Uncomment the next line if you uncomment anything in the section
@@ -145,7 +145,7 @@ services:
     environment:
         - TZ=${NPM_TIMEZONE}
     ports:
-        - "${GOACCESS_PORT:-7880}:7880"
+        - ${GOACCESS_PORT:-7880}:7880
     volumes:
         - goaccess_log:/opt/log
         - goaccess_custom:/opt/custom
@@ -169,6 +169,3 @@ volumes:
       name: logfetcher
     logviewer:
       name: logviewer
-    
-  
-# rabbitmqctl add_vhost qa1
