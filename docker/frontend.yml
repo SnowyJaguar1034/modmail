@@ -88,7 +88,7 @@ services:
       - RESUME=true
       - INTENTS=46593
       - LARGE_THRESHOLD=50
-      - STATUS=${STATUS:online}
+      - STATUS=${STATUS:-online}
       - ACTIVITY_TYPE=${ACTIVITY_TYPE-:0}
       - ACTIVITY_NAME=${ACTIVITY_NAME:-DM to Contact Staff}
       - LOG_CHANNEL=${LOG_CHANNEL:0}
