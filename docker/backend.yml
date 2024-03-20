@@ -8,36 +8,35 @@ networks:
     driver: bridge
     name: private
   public:
-   name: public
-   driver: bridge
-
+    name: public
+    driver: bridge
 
 services:
-
   postgres:
     container_name: postgres
     image: postgres
+    env_file: backend.env
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       PGDATA: /data/postgres
     volumes:
-       - postgres:/data/postgres
+      - postgres:/data/postgres
     ports:
       - ${POSTGRES_PORT:-5432}:5432
     networks:
       - postgres
     restart: unless-stopped
-  
+
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
-       - pgadmin:/var/lib/pgadmin
+      - pgadmin:/var/lib/pgadmin
     ports:
       - ${PGADMIN_PORT:-5050}:80
     networks:
@@ -55,10 +54,11 @@ services:
       - private
       - public
     restart: unless-stopped
-#    volumes:
-#      - logviewer
+    #    volumes:
+    #      - logviewer
     ports:
       - ${EXTERNAL_WEB_PORT:-6060}:6000
+    env_file: backend.env
     environment:
       - BASE_URI=${BASE_URI}
       - HTTP_HOST=${HTTP_HOST:-0.0.0.0}
@@ -67,7 +67,7 @@ services:
       - API_PORT=${INTERNAL_API_PORT:-6001}
     depends_on:
       - logfetcher
-  
+
   logfetcher:
     build:
       context: ..
@@ -77,8 +77,9 @@ services:
     networks:
       - private
     restart: unless-stopped
-#    volumes:
-#      - logfetcher
+    #    volumes:
+    #      - logfetcher
+    env_file: backend.env
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
       - BOT_CLIENT_ID=${BOT_CLIENT_ID}
@@ -101,21 +102,22 @@ services:
       - BOT_API_PORT=${BOT_API_PORT}
     depends_on:
       - cache
-  
+
   cache:
     image: redis:7-alpine
     restart: unless-stopped
     container_name: ${REDIS_HOST}
+    env_file: backend.env
     volumes:
       - cache:/data
     networks:
       - private
-     
 
   npm:
-    image: 'jc21/nginx-proxy-manager:latest'
+    image: "jc21/nginx-proxy-manager:latest"
     restart: unless-stopped
     container_name: nginx-proxy-manager
+    env_file: backend.env
     networks:
       - public
     ports:
@@ -127,45 +129,46 @@ services:
       # - '21:21' # FTP
     # Uncomment the next line if you uncomment anything in the section
     # environment:
-      # Uncomment this if you want to change the location of
-      # the SQLite DB file within the container
-      # DB_SQLITE_FILE: "/data/database.sqlite"
-      # Uncomment this if IPv6 is not enabled on your host
-      # - DISABLE_IPV6: 'true'
+    # Uncomment this if you want to change the location of
+    # the SQLite DB file within the container
+    # DB_SQLITE_FILE: "/data/database.sqlite"
+    # Uncomment this if IPv6 is not enabled on your host
+    # - DISABLE_IPV6: 'true'
     volumes:
       - npm_data:/data
       - npm_letsencrypt:/etc/letsencrypt
 
   goaccess:
-    image: 'xavierh/goaccess-for-nginxproxymanager:latest'
+    image: "xavierh/goaccess-for-nginxproxymanager:latest"
     container_name: goaccess
     restart: unless-stopped
     networks:
       - public
+    env_file: backend.env
     environment:
-        - TZ=${NPM_TIMEZONE}
+      - TZ=${NPM_TIMEZONE}
     ports:
-        - ${GOACCESS_PORT:-7880}:7880
+      - ${GOACCESS_PORT:-7880}:7880
     volumes:
-        - goaccess_log:/opt/log
-        - goaccess_custom:/opt/custom
+      - goaccess_log:/opt/log
+      - goaccess_custom:/opt/custom
 
 volumes:
-    postgres:
-      name: postgres
-    pgadmin:
-      name: pgadmin
-    npm_data:
-      name: npm_data
-    npm_letsencrypt:
-      name: npm_letsencrypt
-    goaccess_log:
-      name: goaccess_log
-    goaccess_custom:
-      name: goaccess_custom
-    cache:
-      name: cache
-    logfetcher:
-      name: logfetcher
-    logviewer:
-      name: logviewer
+  postgres:
+    name: postgres
+  pgadmin:
+    name: pgadmin
+  npm_data:
+    name: npm_data
+  npm_letsencrypt:
+    name: npm_letsencrypt
+  goaccess_log:
+    name: goaccess_log
+  goaccess_custom:
+    name: goaccess_custom
+  cache:
+    name: cache
+  logfetcher:
+    name: logfetcher
+  logviewer:
+    name: logviewer
