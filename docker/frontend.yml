@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 #name: "${BOT_NAME}-stack"
 
 networks:
@@ -10,11 +10,11 @@ networks:
     name: private-${BOT_NAME}
 
 volumes:
-    rabbitmq:
-      name: rabbitmq-${BOT_NAME}
-    redis:
-      name: redis-${BOT_NAME}
-      
+  rabbitmq:
+    name: rabbitmq-${BOT_NAME}
+  redis:
+    name: redis-${BOT_NAME}
+
 services:
   bot:
     build:
@@ -28,12 +28,13 @@ services:
     restart: unless-stopped
     #volumes:
     #  - /home/plugins:/plugins
+    ennv_file: frontend.env
     environment:
       - ENVIRONMENT=development
       - BOT_TOKEN=${BOT_TOKEN}
       - BOT_CLIENT_ID=${BOT_CLIENT_ID}
       - BOT_CLIENT_SECRET=${BOT_CLIENT_SECRET}
-      - DEFAULT_PREFIX=${DEFAULT_PREFIX:-=}
+      - DEFAULT_PREFIX=${DEFAULT_PREFIX:=}
       - DEFAULT_SERVER=${DEFAULT_SERVER}
       - BOT_CLUSTERS=1
       - MAIN_SERVER=
@@ -42,13 +43,13 @@ services:
       - PREMIUM1_ROLE=0
       - PREMIUM3_ROLE=0
       - PREMIUM5_ROLE=0
-      - POSTGRES_DATABASE=${POSTGRES_DATABASE:-modmail}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE:modmail}
       - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:changeme}
       - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_PORT=${POSTGRES_PORT:5432}
       - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PORT=${REDIS_PORT:6379}
       - REDIS_PASSWORD=
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=guest
@@ -63,7 +64,7 @@ services:
       - BOD_TOKEN=
     depends_on:
       - dispatch
-#      - postgres
+      #      - postgres
       - redis
       - rabbitmq
 
@@ -73,6 +74,7 @@ services:
     networks:
       - private
     restart: unless-stopped
+    env_file: frontend.env
     environment:
       - RUST_LOG=info
       - BOT_TOKEN=${BOT_TOKEN}
@@ -86,11 +88,11 @@ services:
       - RESUME=true
       - INTENTS=46593
       - LARGE_THRESHOLD=50
-      - STATUS=online
-      - ACTIVITY_TYPE=0
-      - ACTIVITY_NAME=${ACTIVITY_NAME}
-      - LOG_CHANNEL=0
-      - LOG_GUILD_CHANNEL=0
+      - STATUS=${STATUS:online}
+      - ACTIVITY_TYPE=${ACTIVITY_TYPE:0}
+      - ACTIVITY_NAME=${ACTIVITY_NAME:DM to Contact Staff}
+      - LOG_CHANNEL=${LOG_CHANNEL:0}
+      - LOG_GUILD_CHANNEL=${LOG_GUILD_CHANNEL:0}
       - STATE_ENABLED=true
       - STATE_MEMBER=false
       - STATE_MEMBER_TTL=60000
@@ -105,7 +107,7 @@ services:
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=guest
       - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PORT=${REDIS_PORT:6379}
       - PROMETHEUS_HOST=0.0.0.0
       - PROMETHEUS_PORT=8005
     depends_on:
@@ -115,6 +117,7 @@ services:
   rabbitmq:
     image: rabbitmq:3-alpine
     container_name: rabbitmq-${BOT_NAME}
+    env_file: frontend.env
     networks:
       - private
     restart: unless-stopped
@@ -124,10 +127,11 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    env_file: frontend.env
     volumes:
       - redis:/data
     container_name: redis-${BOT_NAME}
-#    command:
-#      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
+    #    command:
+    #      sh -c "redis-server -p 6379 & redis-server -p 6378 & redis-server -p 6377"
     networks:
       - private
