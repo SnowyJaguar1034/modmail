@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
     #volumes:
     #  - /home/plugins:/plugins
-    ennv_file: frontend.env
+    env_file: frontend.env
     environment:
       - ENVIRONMENT=development
       - BOT_TOKEN=${BOT_TOKEN}
