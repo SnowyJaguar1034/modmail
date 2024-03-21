@@ -64,7 +64,7 @@ services:
       - HTTP_HOST=${HTTP_HOST:-0.0.0.0}
       - HTTP_PORT=${INTERANL_HTTP_PORT:-6000}:6000
       - API_HOST=logviewer
-      - API_PORT=${INTERNAL_API_PORT:6001}
+      - API_PORT=${INTERNAL_API_PORT:-6001}
     depends_on:
       - logfetcher
 
@@ -95,7 +95,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - BASE_URI=${BASE_URI}
       - API_HOST=${HTTP_HOST:-0.0.0.0}
-      - API_PORT=${INTERNAL_API_PORT:6001}
+      - API_PORT=${INTERNAL_API_PORT:-6001}
       - API_WORKERS=1
       - API_SECRET=${API_SECRET}
       - BOT_API_HOST=${BOT_API_HOST}
