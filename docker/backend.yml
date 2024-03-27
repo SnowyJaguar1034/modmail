@@ -23,7 +23,7 @@ services:
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/multi-postgres
-      - ./create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
+      - ${PWD}/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
     ports:
       - ${POSTGRES_PORT:-5432}:5432
     networks:
