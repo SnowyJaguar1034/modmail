@@ -22,7 +22,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       PGDATA: /data/postgres
     volumes:
-      - postgres:/data/multi-postgres
+      - postgres_data:/data/multi-postgres
       - postgres_lib:/var/lib/postgresql/data
       - ${PWD}/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
     ports:
@@ -157,8 +157,8 @@ services:
       - goaccess_custom:/opt/custom
 
 volumes:
-  postgres:
-    name: postgres
+  postgres_data:
+    name: postgres_data
   postgres_lib:
     name: postgres_lib
   pgadmin:
