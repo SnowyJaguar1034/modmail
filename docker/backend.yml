@@ -23,6 +23,7 @@ services:
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/multi-postgres
+      - postgres_lib:/var/lib/postgresql/data
       - ${PWD}/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
     ports:
       - ${POSTGRES_PORT:-5432}:5432
@@ -158,6 +159,8 @@ services:
 volumes:
   postgres:
     name: postgres
+  postgres_lib:
+    name: postgres_lib
   pgadmin:
     name: pgadmin
   npm_data:
