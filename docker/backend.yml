@@ -15,6 +15,7 @@ services:
   postgres:
     container_name: postgres
     image: postgres
+    #build: https://github.com/joeferner/redis-commander.git
     env_file: backend.env
     environment:
       POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_MULTIPLE_DATABASES:-modmail}
