@@ -14,7 +14,8 @@ networks:
 services:
   postgres:
     container_name: postgres
-    image: postgres
+    # image: postgres
+    build: https://github.com/joeferner/redis-commander.git
     env_file: backend.env
     environment:
       POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_MULTIPLE_DATABASES:-modmail}
@@ -24,7 +25,7 @@ services:
     volumes:
       - postgres_data:/data/
       - postgres_lib:/var/lib/postgresql/data
-      - ./docker/:/docker-entrypoint-initdb.d
+      #- ./docker/:/docker-entrypoint-initdb.d
     ports:
       - ${POSTGRES_PORT:-5432}:5432
     networks:
