@@ -3,13 +3,13 @@
 
 networks:
   postgres:
-    name: modmail_postgres
+    name: postgres
     external: true
   backend:
-    name: modmail_backend
+    name: backend
     external: true
   frontend:
-    name: modmail_frontend
+    name: frontend
     external: true
 
 services:

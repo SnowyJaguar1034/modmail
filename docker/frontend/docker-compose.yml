@@ -3,7 +3,7 @@
 
 networks:
   postgres:
-    name: modmail_postgres
+    name: postgres
     external: true
   instance:
     driver: bridge
