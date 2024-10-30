@@ -1,4 +1,13 @@
-version: '3'
+# Compose version flag is deprecated.
+#version: '3'
+
+networks:
+  postgres:
+    name: modmail_postgres
+    external: true
+  instance:
+    driver: bridge
+    name: modmail_${BOT_NAME}
 
 services:
   bot:
