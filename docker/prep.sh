@@ -7,7 +7,6 @@ if ! [ -x "$(command -v docker)" ]; then
     exit 1
 fi
 
-
 # Set colors
 GREEN="\033[32m"
 YELLOW="\033[33m"
