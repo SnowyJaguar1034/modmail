@@ -1,10 +1,12 @@
 #!/bin/sh
 
 # Check if Docker is installed
-if ! command -v docker &> /dev/null; then
+# Check if Docker is installed
+if ! [ -x "$(command -v docker)" ]; then
     echo "${RED}[ERROR] Docker is not installed. Please install Docker and try again.${RESET}"
     exit 1
 fi
+
 
 # Set colors
 GREEN="\033[32m"
