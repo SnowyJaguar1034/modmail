@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Check if Docker is installed
+if ! command -v docker &> /dev/null; then
+    echo "${RED}[ERROR] Docker is not installed. Please install Docker and try again.${RESET}"
+    exit 1
+fi
+
 # Set colors
 GREEN="\033[32m"
 YELLOW="\033[33m"
@@ -23,13 +29,19 @@ echo ""
 create_resource() {
     type="$1"          # "network" or "volume"
     default_name="$2"
-    fallback_name="$3"
+        if ! docker "$type" create "$default_name"; then
+            echo "${RED}[ERROR] Failed to create Docker $type: $default_name${RESET}"
+            exit 1
+        fi
 
     if docker "$type" ls --format '{{.Name}}' | grep -qw "$default_name"; then
         echo "${YELLOW}[NOTICE] $type '$default_name' already exists!${RESET}"
     else
         echo "${YELLOW}[UPDATE] Creating Docker $type: $default_name${RESET}"
-        docker "$type" create "$default_name"
+    if ! docker "$type" create "$name"; then
+        echo "${RED}[ERROR] Failed to create Docker $type: $name${RESET}"
+        exit 1
+    fi
         echo "${GREEN}[OK] Docker $type created: $default_name${RESET}"
         return
     fi
@@ -75,4 +87,3 @@ done
 if [ "$missing_items" = false ]; then
     echo "${GREEN}🎉 All networks and volumes are set up correctly, no docker-compose.yml updates needed!${RESET}"
 fi
-
