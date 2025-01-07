@@ -34,7 +34,7 @@ resource_exists() {
 # Function to display existing resources
 display_resources() {
     local type="$1"
-    local resources=$(docker "$type" ls --format "{{.Name}} ({{.Driver}})" | grep -v "^NAME" | tr '\n' ', ' | sed 's/,\s*$//')
+    local resources=$(docker "$type" ls --format "{{.Name}} ({{.Driver}})" | grep -v "^NAME" | tr '\n' ',' | sed 's/,\s*$//')
     
     echo -ne "${YELLOW}Current Docker ${type^}s: ${RESET}"
     if [ -z "$resources" ]; then
@@ -44,17 +44,20 @@ display_resources() {
     fi
 }
 
-# Function to display naming options
+# Function to display naming options for all resources
 display_naming_options() {
     local type="$1"
-    local default_name="$2"
-    local fallback_name="$3"
+    local -n default_arr="$2"
+    local -n fallback_arr="$3"
     
-    echo -e "${YELLOW}Available naming schemes:${RESET}"
-    echo "[d]efault  : $default_name"
-    echo "[e]xplicit : $fallback_name"
-    echo "[c]ustom   : Enter your own name"
-    echo ""
+    echo -e "${YELLOW}Available naming schemes for all ${type}s:${RESET}"
+    for i in "${!default_arr[@]}"; do
+        echo "${default_arr[$i]}:"
+        echo "  [d]efault  : ${default_arr[$i]}"
+        echo "  [e]xplicit : ${fallback_arr[$i]}"
+        echo "  [c]ustom   : Enter your own name"
+        echo ""
+    done
 }
 
 # Function to get resource name based on naming scheme
@@ -73,7 +76,7 @@ get_resource_name() {
                     echo -e "${RED}[ERROR] $type '$default_name' already exists!${RESET}"
                     continue
                 fi
-                echo -e "${CHOSEN_NETWORKS[$default_name]}"
+                echo -e "${default_name}"
                 return
                 ;;
             "e"|"explicit")
@@ -108,24 +111,96 @@ get_resource_name() {
 
 # Function to collect all resource names
 collect_resource_names() {
-    echo -e "\n${GREEN}🎯 Pick Resource Names${RESET}"
+    echo -e "${GREEN}🎯 Pick Resource Names${RESET}"
     
     echo -e "\n${YELLOW}Networks to be created:${RESET}"
-    # Display network naming options once at the start
-    display_naming_options "network" "${DEFAULT_NAMES[0]}" "${FALLBACK_NAMES[0]}"
+    # Display all network naming options at start
+    display_naming_options "network" DEFAULT_NAMES FALLBACK_NAMES
+    
     for i in "${!DEFAULT_NAMES[@]}"; do
         CHOSEN_NETWORKS[${DEFAULT_NAMES[$i]}]=$(get_resource_name "network" "${DEFAULT_NAMES[$i]}" "${FALLBACK_NAMES[$i]}")
     done
 
     echo -e "\n${YELLOW}Volumes to be created:${RESET}"
-    # Display volume naming options once at the start
-    display_naming_options "volume" "${DEFAULT_VOLUMES[0]}" "modmail_${DEFAULT_VOLUMES[0]}"
+    # Display all volume naming options at start
+    display_naming_options "volume" DEFAULT_VOLUMES DEFAULT_VOLUMES
+    
     for volume in "${DEFAULT_VOLUMES[@]}"; do
         CHOSEN_VOLUMES[$volume]=$(get_resource_name "volume" "$volume" "modmail_${volume}")
     done
 }
 
-[Previous functions remain the same: preview_choices, create_resources, print_summary]
+# Function to preview chosen names
+preview_choices() {
+    echo -e "\n${GREEN}📋 Final Review:${RESET}"
+    echo -e "${YELLOW}Networks to create:${RESET}"
+    for name in "${DEFAULT_NAMES[@]}"; do
+        echo "  - ${name} → ${CHOSEN_NETWORKS[$name]}"
+    done
+    
+    echo -e "\n${YELLOW}Volumes to create:${RESET}"
+    for name in "${DEFAULT_VOLUMES[@]}"; do
+        echo "  - ${name} → ${CHOSEN_VOLUMES[$name]}"
+    done
+    
+    while true; do
+        read -p $'\n'"Proceed with creation? [y/N]: " confirm
+        case ${confirm,,} in
+            "y"|"yes")
+                return 0
+                ;;
+            "n"|"no"|"")
+                echo -e "${RED}Operation cancelled by user${RESET}"
+                exit 0
+                ;;
+            *)
+                echo -e "${RED}Invalid choice. Please enter 'y' or 'n'${RESET}"
+                ;;
+        esac
+    done
+}
+
+# Function to create resources
+create_resources() {
+    echo -e "\n${YELLOW}Creating Networks:${RESET}"
+    for name in "${DEFAULT_NAMES[@]}"; do
+        echo -e "${YELLOW}[UPDATE] Creating network: ${CHOSEN_NETWORKS[$name]}${RESET}"
+        if ! docker network create "${CHOSEN_NETWORKS[$name]}"; then
+            echo -e "${RED}[ERROR] Failed to create network: ${CHOSEN_NETWORKS[$name]}${RESET}"
+            exit 1
+        fi
+        echo -e "${GREEN}[OK] Network created: ${CHOSEN_NETWORKS[$name]}${RESET}"
+    done
+
+    echo -e "\n${YELLOW}Creating Volumes:${RESET}"
+    for name in "${DEFAULT_VOLUMES[@]}"; do
+        echo -e "${YELLOW}[UPDATE] Creating volume: ${CHOSEN_VOLUMES[$name]}${RESET}"
+        if ! docker volume create "${CHOSEN_VOLUMES[$name]}"; then
+            echo -e "${RED}[ERROR] Failed to create volume: ${CHOSEN_VOLUMES[$name]}${RESET}"
+            exit 1
+        fi
+        echo -e "${GREEN}[OK] Volume created: ${CHOSEN_VOLUMES[$name]}${RESET}"
+    done
+}
+
+# Function to print final summary
+print_summary() {
+    echo -e "\n${GREEN}📋 Summary of Changes:${RESET}"
+    echo -e "${YELLOW}Created Networks:${RESET}"
+    for name in "${DEFAULT_NAMES[@]}"; do
+        echo "  - ${name} → ${CHOSEN_NETWORKS[$name]}"
+    done
+    
+    echo -e "\n${YELLOW}Created Volumes:${RESET}"
+    for name in "${DEFAULT_VOLUMES[@]}"; do
+        echo "  - ${name} → ${CHOSEN_VOLUMES[$name]}"
+    done
+    
+    echo -e "\n${YELLOW}Next Steps:${RESET}"
+    echo "1. Update your docker-compose.yml file with these resource names"
+    echo "2. Make sure your container configurations reference these names"
+    echo -e "${GREEN}🎉 Docker environment setup completed!${RESET}"
+}
 
 # Main script execution
 echo -e "${GREEN}🚀 Starting Docker Prep Script${RESET}"
@@ -138,7 +213,7 @@ check_docker
 display_resources "network"
 echo ""
 display_resources "volume"
-echo -e "\n"
+echo ""
 
 # Collect all resource names first
 collect_resource_names
