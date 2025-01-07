@@ -151,12 +151,12 @@ preview_choices() {
     echo -e "\n${GREEN}📋 Final Review:${RESET}"
     echo -e "${YELLOW}Networks to create:${RESET}"
     for name in "${MODMAIL_NETWORKS[@]}"; do
-        echo "  ${NETWORK_DESCRIPTIONS[$name]}: $name → ${CHOSEN_NETWORKS[$name]}"
+        echo "  ${NETWORK_DESCRIPTIONS[$name]}: ${CHOSEN_NETWORKS[$name]}"
     done
     
     echo -e "\n${YELLOW}Volumes to create:${RESET}"
     for name in "${MODMAIL_DB_VOLUMES[@]}"; do
-        echo "  ${VOLUME_DESCRIPTIONS[$name]}: $name → ${CHOSEN_VOLUMES[$name]}"
+        echo "  ${VOLUME_DESCRIPTIONS[$name]}: ${CHOSEN_VOLUMES[$name]}"
     done
     
     while true; do
@@ -204,12 +204,12 @@ print_summary() {
     echo -e "\n${GREEN}📋 Summary of Changes:${RESET}"
     echo -e "${YELLOW}Created Networks:${RESET}"
     for name in "${MODMAIL_NETWORKS[@]}"; do
-        echo "  ${NETWORK_DESCRIPTIONS[$name]}: $name → ${CHOSEN_NETWORKS[$name]}"
+        echo "  ${NETWORK_DESCRIPTIONS[$name]}: ${CHOSEN_NETWORKS[$name]}"
     done
     
     echo -e "\n${YELLOW}Created Volumes:${RESET}"
     for name in "${MODMAIL_DB_VOLUMES[@]}"; do
-        echo "  ${VOLUME_DESCRIPTIONS[$name]}: $name → ${CHOSEN_VOLUMES[$name]}"
+        echo "  ${VOLUME_DESCRIPTIONS[$name]}: ${CHOSEN_VOLUMES[$name]}"
     done
     
     echo -e "\n${YELLOW}Next Steps:${RESET}"
