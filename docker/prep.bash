@@ -27,7 +27,7 @@ check_docker() {
 resource_exists() {
     local type="$1"
     local name="$2"
-    docker "$type" ls --format '{{.Name}}' | grep -qw "$name"
+    docker "$type" ls -q --filter "name=^${name}$" | grep -q .
     return $?
 }
 
@@ -37,13 +37,13 @@ get_resource_name() {
     local default_name="$2"
     local fallback_name="$3"
     
-    echo -e "${YELLOW}Choose naming scheme for $type '$default_name':${RESET}"
-    echo "Enter: [d]efault ($default_name)"
-    echo "       [e]xplicit ($fallback_name)"
-    echo "       [c]ustom (enter your own name)"
+    echo -e "\n${YELLOW}Naming for $type '$default_name':${RESET}"
+    echo "[d]efault  : $default_name"
+    echo "[e]xplicit : $fallback_name"
+    echo "[c]ustom   : Enter your own name"
     
     while true; do
-        read -p "Choice [d/e/c]: " choice
+        read -p "$type ($default_name) Choice [d/e/c]: " choice
         case ${choice,,} in  # ${choice,,} converts to lowercase
             "d"|"default")
                 if resource_exists "$type" "$default_name"; then
@@ -63,7 +63,7 @@ get_resource_name() {
                 ;;
             "c"|"custom")
                 while true; do
-                    read -p "Enter custom name: " custom_name
+                    read -p "Enter custom name for $type ($default_name): " custom_name
                     if [ -z "$custom_name" ]; then
                         echo -e "${RED}[ERROR] Custom name cannot be empty${RESET}"
                         continue
@@ -85,12 +85,12 @@ get_resource_name() {
 
 # Function to collect all resource names
 collect_resource_names() {
-    echo -e "\n${YELLOW}Collecting network names:${RESET}"
+    echo -e "\n${YELLOW}Setting up network names:${RESET}"
     for i in "${!DEFAULT_NAMES[@]}"; do
         CHOSEN_NETWORKS[${DEFAULT_NAMES[$i]}]=$(get_resource_name "network" "${DEFAULT_NAMES[$i]}" "${FALLBACK_NAMES[$i]}")
     done
 
-    echo -e "\n${YELLOW}Collecting volume names:${RESET}"
+    echo -e "\n${YELLOW}Setting up volume names:${RESET}"
     for volume in "${DEFAULT_VOLUMES[@]}"; do
         CHOSEN_VOLUMES[$volume]=$(get_resource_name "volume" "$volume" "modmail_${volume}")
     done
@@ -109,12 +109,21 @@ preview_choices() {
         echo "  - ${name} → ${CHOSEN_VOLUMES[$name]}"
     done
     
-    echo -e "\n${YELLOW}Proceed with creation? [y/N]:${RESET} "
-    read -r confirm
-    if [[ ! ${confirm,,} =~ ^(y|yes)$ ]]; then
-        echo -e "${RED}Operation cancelled by user${RESET}"
-        exit 0
-    fi
+    while true; do
+        read -p $'\n'"Proceed with creation? [y/N]: " confirm
+        case ${confirm,,} in
+            "y"|"yes")
+                return 0
+                ;;
+            "n"|"no"|"")
+                echo -e "${RED}Operation cancelled by user${RESET}"
+                exit 0
+                ;;
+            *)
+                echo -e "${RED}Invalid choice. Please enter 'y' or 'n'${RESET}"
+                ;;
+        esac
+    done
 }
 
 # Function to create resources
@@ -142,7 +151,7 @@ create_resources() {
 
 # Function to print final summary
 print_summary() {
-    echo -e "\n${GREEN}📋 Summary of Changes:${RESET}"
+    echo -e "\n${GREEN}📋 Final Summary:${RESET}"
     echo -e "${YELLOW}Created Networks:${RESET}"
     for name in "${DEFAULT_NAMES[@]}"; do
         echo "  - ${name} → ${CHOSEN_NETWORKS[$name]}"
@@ -166,10 +175,9 @@ echo -e "${YELLOW}🛠️ Configuring Docker for ModMail Bot${RESET}"
 # Check Docker installation
 check_docker
 
-# Print current Docker Networks
+# Print current Docker Networks (using quiet filter to avoid capturing output)
 echo -e "${YELLOW}[NOTICE] Current Docker Networks:${RESET}"
-docker network ls --format "table {{.Name}}\t{{.Driver}}\t{{.Scope}}\t{{.Internal}}"
-echo ""
+docker network ls --format "table {{.Name}}\t{{.Driver}}\t{{.Scope}}\t{{.Internal}}" | grep -v "^NAME"
 
 # Collect all resource names first
 collect_resource_names
