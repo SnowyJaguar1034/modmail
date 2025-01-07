@@ -85,46 +85,50 @@ get_resource_name() {
     local default_name="$2"
     local fallback_name="$3"
     local description="$4"
+    local chosen_name=""
     
     while true; do
         read -p "$description ($default_name) Choice [d/e/c]: " choice
         case ${choice,,} in  # ${choice,,} converts to lowercase
             "d"|"default")
                 if resource_exists "$type" "$default_name"; then
-                    echo -e "${RED}[ERROR] $type '$default_name' already exists!${RESET}"
+                    echo -e "${RED}[ERROR] $type '$default_name' already exists!${RESET}" >&2
                     continue
                 fi
-                echo "$default_name"
-                return
+                chosen_name="$default_name"
+                break
                 ;;
             "e"|"explicit")
                 if resource_exists "$type" "$fallback_name"; then
-                    echo -e "${RED}[ERROR] $type '$fallback_name' already exists!${RESET}"
+                    echo -e "${RED}[ERROR] $type '$fallback_name' already exists!${RESET}" >&2
                     continue
                 fi
-                echo "$fallback_name"
-                return
+                chosen_name="$fallback_name"
+                break
                 ;;
             "c"|"custom")
                 while true; do
                     read -p "Enter custom name for $description ($default_name): " custom_name
                     if [ -z "$custom_name" ]; then
-                        echo -e "${RED}[ERROR] Custom name cannot be empty${RESET}"
+                        echo -e "${RED}[ERROR] Custom name cannot be empty${RESET}" >&2
                         continue
                     fi
                     if resource_exists "$type" "$custom_name"; then
-                        echo -e "${RED}[ERROR] $type '$custom_name' already exists!${RESET}"
+                        echo -e "${RED}[ERROR] $type '$custom_name' already exists!${RESET}" >&2
                         continue
                     fi
-                    echo "$custom_name"
-                    return
+                    chosen_name="$custom_name"
+                    break
                 done
+                break
                 ;;
             *)
-                echo -e "${RED}Invalid choice. Please enter 'd', 'e', or 'c'${RESET}"
+                echo -e "${RED}Invalid choice. Please enter 'd', 'e', or 'c'${RESET}" >&2
                 ;;
         esac
     done
+    
+    echo "$chosen_name"
 }
 
 # Function to collect all resource names
@@ -170,7 +174,7 @@ preview_choices() {
                 exit 0
                 ;;
             *)
-                echo -e "${RED}Invalid choice. Please enter 'y' or 'n'${RESET}"
+                echo -e "${RED}Invalid choice. Please enter 'y' or 'n'${RESET}" >&2
                 ;;
         esac
     done
