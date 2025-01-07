@@ -9,7 +9,7 @@ RESET='\033[0m'
 # Default and fallback names for networks and volumes
 DEFAULT_NAMES=("postgres" "backend" "frontend")
 FALLBACK_NAMES=("modmail_postgres" "modmail_backend" "modmail_frontend")
-DEFAULT_VOLUMES=("postgres" "modmail_postgres")
+DEFAULT_VOLUMES=("postgres")
 
 # Arrays to store chosen names
 declare -A CHOSEN_NETWORKS
@@ -31,13 +31,29 @@ resource_exists() {
     return $?
 }
 
+# Function to display existing resources
+display_resources() {
+    local type="$1"
+    echo -e "${YELLOW}Current Docker ${type^}s:${RESET}"
+    if [ "$type" = "network" ]; then
+        docker network ls --format "{{.Name}} ({{.Driver}})" | grep -v "^NAME"
+    else
+        docker volume ls --format "{{.Name}} ({{.Driver}})"
+    fi
+    echo ""
+}
+
 # Function to get resource name based on naming scheme
 get_resource_name() {
     local type="$1"
     local default_name="$2"
     local fallback_name="$3"
     
-    echo -e "\n${YELLOW}Naming for $type '$default_name':${RESET}"
+    # Display the name being decided
+    echo -e "  - ${default_name} → "
+    
+    # Display naming options
+    echo -e "Naming for $type '$default_name':"
     echo "[d]efault  : $default_name"
     echo "[e]xplicit : $fallback_name"
     echo "[c]ustom   : Enter your own name"
@@ -85,12 +101,14 @@ get_resource_name() {
 
 # Function to collect all resource names
 collect_resource_names() {
-    echo -e "\n${YELLOW}Setting up network names:${RESET}"
+    echo -e "\n${GREEN}📋 Review Your Choices:${RESET}"
+    
+    echo -e "${YELLOW}Networks to be created:${RESET}"
     for i in "${!DEFAULT_NAMES[@]}"; do
         CHOSEN_NETWORKS[${DEFAULT_NAMES[$i]}]=$(get_resource_name "network" "${DEFAULT_NAMES[$i]}" "${FALLBACK_NAMES[$i]}")
     done
 
-    echo -e "\n${YELLOW}Setting up volume names:${RESET}"
+    echo -e "\n${YELLOW}Volumes to be created:${RESET}"
     for volume in "${DEFAULT_VOLUMES[@]}"; do
         CHOSEN_VOLUMES[$volume]=$(get_resource_name "volume" "$volume" "modmail_${volume}")
     done
@@ -98,13 +116,13 @@ collect_resource_names() {
 
 # Function to preview chosen names
 preview_choices() {
-    echo -e "\n${GREEN}📋 Review Your Choices:${RESET}"
-    echo -e "${YELLOW}Networks to be created:${RESET}"
+    echo -e "\n${GREEN}📋 Final Review:${RESET}"
+    echo -e "${YELLOW}Networks to create:${RESET}"
     for name in "${DEFAULT_NAMES[@]}"; do
         echo "  - ${name} → ${CHOSEN_NETWORKS[$name]}"
     done
     
-    echo -e "\n${YELLOW}Volumes to be created:${RESET}"
+    echo -e "\n${YELLOW}Volumes to create:${RESET}"
     for name in "${DEFAULT_VOLUMES[@]}"; do
         echo "  - ${name} → ${CHOSEN_VOLUMES[$name]}"
     done
@@ -151,7 +169,7 @@ create_resources() {
 
 # Function to print final summary
 print_summary() {
-    echo -e "\n${GREEN}📋 Final Summary:${RESET}"
+    echo -e "\n${GREEN}📋 Summary of Changes:${RESET}"
     echo -e "${YELLOW}Created Networks:${RESET}"
     for name in "${DEFAULT_NAMES[@]}"; do
         echo "  - ${name} → ${CHOSEN_NETWORKS[$name]}"
@@ -175,9 +193,9 @@ echo -e "${YELLOW}🛠️ Configuring Docker for ModMail Bot${RESET}"
 # Check Docker installation
 check_docker
 
-# Print current Docker Networks (using quiet filter to avoid capturing output)
-echo -e "${YELLOW}[NOTICE] Current Docker Networks:${RESET}"
-docker network ls --format "table {{.Name}}\t{{.Driver}}\t{{.Scope}}\t{{.Internal}}" | grep -v "^NAME"
+# Display current resources
+display_resources "network"
+display_resources "volume"
 
 # Collect all resource names first
 collect_resource_names
