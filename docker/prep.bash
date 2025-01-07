@@ -7,9 +7,20 @@ RED='\033[0;31m'
 RESET='\033[0m'
 
 # Default and fallback names for networks and volumes
-DEFAULT_NAMES=("postgres" "backend" "frontend")
-FALLBACK_NAMES=("modmail_postgres" "modmail_backend" "modmail_frontend")
-DEFAULT_VOLUMES=("postgres")
+MODMAIL_NETWORKS=("postgres" "backend" "frontend")          # Database, API, and Web UI networks
+MODMAIL_NETWORK_FALLBACKS=("modmail_postgres" "modmail_backend" "modmail_frontend")
+MODMAIL_DB_VOLUMES=("postgres")                            # Persistent storage for ModMail database
+
+# Description mappings for networks and volumes
+declare -A NETWORK_DESCRIPTIONS=(
+    ["postgres"]="Database Network"
+    ["backend"]="API Network"
+    ["frontend"]="Web UI Network"
+)
+
+declare -A VOLUME_DESCRIPTIONS=(
+    ["postgres"]="Database Storage"
+)
 
 # Arrays to store chosen names
 declare -A CHOSEN_NETWORKS
@@ -44,17 +55,25 @@ display_resources() {
     fi
 }
 
-# Function to display naming options for all resources
+# Function to display naming options
 display_naming_options() {
     local type="$1"
     local -n default_arr="$2"
     local -n fallback_arr="$3"
+    local -n descriptions="$4"
     
-    echo -e "${YELLOW}Available naming schemes for all ${type}s:${RESET}"
+    echo -e "${YELLOW}Available naming schemes for ModMail ${type}s:${RESET}"
     for i in "${!default_arr[@]}"; do
-        echo "${default_arr[$i]}:"
+        local fallback_name
+        if [ "$type" = "volume" ]; then
+            fallback_name="modmail_${default_arr[$i]}"
+        else
+            fallback_name="${fallback_arr[$i]}"
+        fi
+        
+        echo "${descriptions[${default_arr[$i]}]} (${default_arr[$i]}):"
         echo "  [d]efault  : ${default_arr[$i]}"
-        echo "  [e]xplicit : ${fallback_arr[$i]}"
+        echo "  [e]xplicit : ${fallback_name}"
         echo "  [c]ustom   : Enter your own name"
         echo ""
     done
@@ -65,18 +84,17 @@ get_resource_name() {
     local type="$1"
     local default_name="$2"
     local fallback_name="$3"
-    
-    echo -e "  - ${default_name} → \c"
+    local description="$4"
     
     while true; do
-        read -p "$type ($default_name) Choice [d/e/c]: " choice
+        read -p "$description ($default_name) Choice [d/e/c]: " choice
         case ${choice,,} in  # ${choice,,} converts to lowercase
             "d"|"default")
                 if resource_exists "$type" "$default_name"; then
                     echo -e "${RED}[ERROR] $type '$default_name' already exists!${RESET}"
                     continue
                 fi
-                echo -e "${default_name}"
+                echo "$default_name"
                 return
                 ;;
             "e"|"explicit")
@@ -84,12 +102,12 @@ get_resource_name() {
                     echo -e "${RED}[ERROR] $type '$fallback_name' already exists!${RESET}"
                     continue
                 fi
-                echo -e "${fallback_name}"
+                echo "$fallback_name"
                 return
                 ;;
             "c"|"custom")
                 while true; do
-                    read -p "Enter custom name for $type ($default_name): " custom_name
+                    read -p "Enter custom name for $description ($default_name): " custom_name
                     if [ -z "$custom_name" ]; then
                         echo -e "${RED}[ERROR] Custom name cannot be empty${RESET}"
                         continue
@@ -98,7 +116,7 @@ get_resource_name() {
                         echo -e "${RED}[ERROR] $type '$custom_name' already exists!${RESET}"
                         continue
                     fi
-                    echo -e "${custom_name}"
+                    echo "$custom_name"
                     return
                 done
                 ;;
@@ -114,19 +132,17 @@ collect_resource_names() {
     echo -e "${GREEN}🎯 Pick Resource Names${RESET}"
     
     echo -e "\n${YELLOW}Networks to be created:${RESET}"
-    # Display all network naming options at start
-    display_naming_options "network" DEFAULT_NAMES FALLBACK_NAMES
+    display_naming_options "network" MODMAIL_NETWORKS MODMAIL_NETWORK_FALLBACKS NETWORK_DESCRIPTIONS
     
-    for i in "${!DEFAULT_NAMES[@]}"; do
-        CHOSEN_NETWORKS[${DEFAULT_NAMES[$i]}]=$(get_resource_name "network" "${DEFAULT_NAMES[$i]}" "${FALLBACK_NAMES[$i]}")
+    for name in "${MODMAIL_NETWORKS[@]}"; do
+        CHOSEN_NETWORKS[$name]=$(get_resource_name "network" "$name" "modmail_$name" "${NETWORK_DESCRIPTIONS[$name]}")
     done
 
     echo -e "\n${YELLOW}Volumes to be created:${RESET}"
-    # Display all volume naming options at start
-    display_naming_options "volume" DEFAULT_VOLUMES DEFAULT_VOLUMES
+    display_naming_options "volume" MODMAIL_DB_VOLUMES MODMAIL_DB_VOLUMES VOLUME_DESCRIPTIONS
     
-    for volume in "${DEFAULT_VOLUMES[@]}"; do
-        CHOSEN_VOLUMES[$volume]=$(get_resource_name "volume" "$volume" "modmail_${volume}")
+    for volume in "${MODMAIL_DB_VOLUMES[@]}"; do
+        CHOSEN_VOLUMES[$volume]=$(get_resource_name "volume" "$volume" "modmail_${volume}" "${VOLUME_DESCRIPTIONS[$volume]}")
     done
 }
 
@@ -134,13 +150,13 @@ collect_resource_names() {
 preview_choices() {
     echo -e "\n${GREEN}📋 Final Review:${RESET}"
     echo -e "${YELLOW}Networks to create:${RESET}"
-    for name in "${DEFAULT_NAMES[@]}"; do
-        echo "  - ${name} → ${CHOSEN_NETWORKS[$name]}"
+    for name in "${MODMAIL_NETWORKS[@]}"; do
+        echo "  ${NETWORK_DESCRIPTIONS[$name]}: $name → ${CHOSEN_NETWORKS[$name]}"
     done
     
     echo -e "\n${YELLOW}Volumes to create:${RESET}"
-    for name in "${DEFAULT_VOLUMES[@]}"; do
-        echo "  - ${name} → ${CHOSEN_VOLUMES[$name]}"
+    for name in "${MODMAIL_DB_VOLUMES[@]}"; do
+        echo "  ${VOLUME_DESCRIPTIONS[$name]}: $name → ${CHOSEN_VOLUMES[$name]}"
     done
     
     while true; do
@@ -163,8 +179,8 @@ preview_choices() {
 # Function to create resources
 create_resources() {
     echo -e "\n${YELLOW}Creating Networks:${RESET}"
-    for name in "${DEFAULT_NAMES[@]}"; do
-        echo -e "${YELLOW}[UPDATE] Creating network: ${CHOSEN_NETWORKS[$name]}${RESET}"
+    for name in "${MODMAIL_NETWORKS[@]}"; do
+        echo -e "${YELLOW}[UPDATE] Creating network (${NETWORK_DESCRIPTIONS[$name]}): ${CHOSEN_NETWORKS[$name]}${RESET}"
         if ! docker network create "${CHOSEN_NETWORKS[$name]}"; then
             echo -e "${RED}[ERROR] Failed to create network: ${CHOSEN_NETWORKS[$name]}${RESET}"
             exit 1
@@ -173,8 +189,8 @@ create_resources() {
     done
 
     echo -e "\n${YELLOW}Creating Volumes:${RESET}"
-    for name in "${DEFAULT_VOLUMES[@]}"; do
-        echo -e "${YELLOW}[UPDATE] Creating volume: ${CHOSEN_VOLUMES[$name]}${RESET}"
+    for name in "${MODMAIL_DB_VOLUMES[@]}"; do
+        echo -e "${YELLOW}[UPDATE] Creating volume (${VOLUME_DESCRIPTIONS[$name]}): ${CHOSEN_VOLUMES[$name]}${RESET}"
         if ! docker volume create "${CHOSEN_VOLUMES[$name]}"; then
             echo -e "${RED}[ERROR] Failed to create volume: ${CHOSEN_VOLUMES[$name]}${RESET}"
             exit 1
@@ -187,13 +203,13 @@ create_resources() {
 print_summary() {
     echo -e "\n${GREEN}📋 Summary of Changes:${RESET}"
     echo -e "${YELLOW}Created Networks:${RESET}"
-    for name in "${DEFAULT_NAMES[@]}"; do
-        echo "  - ${name} → ${CHOSEN_NETWORKS[$name]}"
+    for name in "${MODMAIL_NETWORKS[@]}"; do
+        echo "  ${NETWORK_DESCRIPTIONS[$name]}: $name → ${CHOSEN_NETWORKS[$name]}"
     done
     
     echo -e "\n${YELLOW}Created Volumes:${RESET}"
-    for name in "${DEFAULT_VOLUMES[@]}"; do
-        echo "  - ${name} → ${CHOSEN_VOLUMES[$name]}"
+    for name in "${MODMAIL_DB_VOLUMES[@]}"; do
+        echo "  ${VOLUME_DESCRIPTIONS[$name]}: $name → ${CHOSEN_VOLUMES[$name]}"
     done
     
     echo -e "\n${YELLOW}Next Steps:${RESET}"
