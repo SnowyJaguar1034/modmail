@@ -11,8 +11,9 @@ DEFAULT_NAMES=("postgres" "backend" "frontend")
 FALLBACK_NAMES=("modmail_postgres" "modmail_backend" "modmail_frontend")
 DEFAULT_VOLUMES=("postgres" "modmail_postgres")
 
-# Array to store created resources for summary
-declare -A CREATED_RESOURCES
+# Arrays to store chosen names
+declare -A CHOSEN_NETWORKS
+declare -A CHOSEN_VOLUMES
 
 # Function to check if Docker is installed
 check_docker() {
@@ -37,14 +38,14 @@ get_resource_name() {
     local fallback_name="$3"
     
     echo -e "${YELLOW}Choose naming scheme for $type '$default_name':${RESET}"
-    echo "Options: default ($default_name)"
-    echo "         explicit ($fallback_name)"
-    echo "         custom (enter your own name)"
+    echo "Enter: [d]efault ($default_name)"
+    echo "       [e]xplicit ($fallback_name)"
+    echo "       [c]ustom (enter your own name)"
     
     while true; do
-        read -p "Enter choice [default/explicit/custom]: " choice
+        read -p "Choice [d/e/c]: " choice
         case ${choice,,} in  # ${choice,,} converts to lowercase
-            "default")
+            "d"|"default")
                 if resource_exists "$type" "$default_name"; then
                     echo -e "${RED}[ERROR] $type '$default_name' already exists!${RESET}"
                     continue
@@ -52,7 +53,7 @@ get_resource_name() {
                 echo "$default_name"
                 return
                 ;;
-            "explicit")
+            "e"|"explicit")
                 if resource_exists "$type" "$fallback_name"; then
                     echo -e "${RED}[ERROR] $type '$fallback_name' already exists!${RESET}"
                     continue
@@ -60,7 +61,7 @@ get_resource_name() {
                 echo "$fallback_name"
                 return
                 ;;
-            "custom")
+            "c"|"custom")
                 while true; do
                     read -p "Enter custom name: " custom_name
                     if [ -z "$custom_name" ]; then
@@ -76,50 +77,80 @@ get_resource_name() {
                 done
                 ;;
             *)
-                echo -e "${RED}Invalid choice. Please enter 'default', 'explicit', or 'custom'${RESET}"
+                echo -e "${RED}Invalid choice. Please enter 'd', 'e', or 'c'${RESET}"
                 ;;
         esac
     done
 }
 
-# Function to create a Docker resource
-create_resource() {
-    local type="$1"
-    local default_name="$2"
-    local fallback_name="$3"
-    
-    echo -e "${YELLOW}[UPDATE] Setting up Docker $type: $default_name${RESET}"
-    
-    local resource_name
-    resource_name=$(get_resource_name "$type" "$default_name" "$fallback_name")
-    
-    echo -e "${YELLOW}[UPDATE] Creating Docker $type: $resource_name${RESET}"
-    if ! docker "$type" create "$resource_name"; then
-        echo -e "${RED}[ERROR] Failed to create Docker $type: $resource_name${RESET}"
-        exit 1
-    fi
-    echo -e "${GREEN}[OK] Docker $type created: $resource_name${RESET}"
-    echo ""
-    
-    # Store the created resource for summary
-    CREATED_RESOURCES["${type}_${default_name}"]="$resource_name"
+# Function to collect all resource names
+collect_resource_names() {
+    echo -e "\n${YELLOW}Collecting network names:${RESET}"
+    for i in "${!DEFAULT_NAMES[@]}"; do
+        CHOSEN_NETWORKS[${DEFAULT_NAMES[$i]}]=$(get_resource_name "network" "${DEFAULT_NAMES[$i]}" "${FALLBACK_NAMES[$i]}")
+    done
+
+    echo -e "\n${YELLOW}Collecting volume names:${RESET}"
+    for volume in "${DEFAULT_VOLUMES[@]}"; do
+        CHOSEN_VOLUMES[$volume]=$(get_resource_name "volume" "$volume" "modmail_${volume}")
+    done
 }
 
-# Function to print summary
+# Function to preview chosen names
+preview_choices() {
+    echo -e "\n${GREEN}📋 Review Your Choices:${RESET}"
+    echo -e "${YELLOW}Networks to be created:${RESET}"
+    for name in "${DEFAULT_NAMES[@]}"; do
+        echo "  - ${name} → ${CHOSEN_NETWORKS[$name]}"
+    done
+    
+    echo -e "\n${YELLOW}Volumes to be created:${RESET}"
+    for name in "${DEFAULT_VOLUMES[@]}"; do
+        echo "  - ${name} → ${CHOSEN_VOLUMES[$name]}"
+    done
+    
+    echo -e "\n${YELLOW}Proceed with creation? [y/N]:${RESET} "
+    read -r confirm
+    if [[ ! ${confirm,,} =~ ^(y|yes)$ ]]; then
+        echo -e "${RED}Operation cancelled by user${RESET}"
+        exit 0
+    fi
+}
+
+# Function to create resources
+create_resources() {
+    echo -e "\n${YELLOW}Creating Networks:${RESET}"
+    for name in "${DEFAULT_NAMES[@]}"; do
+        echo -e "${YELLOW}[UPDATE] Creating network: ${CHOSEN_NETWORKS[$name]}${RESET}"
+        if ! docker network create "${CHOSEN_NETWORKS[$name]}"; then
+            echo -e "${RED}[ERROR] Failed to create network: ${CHOSEN_NETWORKS[$name]}${RESET}"
+            exit 1
+        fi
+        echo -e "${GREEN}[OK] Network created: ${CHOSEN_NETWORKS[$name]}${RESET}"
+    done
+
+    echo -e "\n${YELLOW}Creating Volumes:${RESET}"
+    for name in "${DEFAULT_VOLUMES[@]}"; do
+        echo -e "${YELLOW}[UPDATE] Creating volume: ${CHOSEN_VOLUMES[$name]}${RESET}"
+        if ! docker volume create "${CHOSEN_VOLUMES[$name]}"; then
+            echo -e "${RED}[ERROR] Failed to create volume: ${CHOSEN_VOLUMES[$name]}${RESET}"
+            exit 1
+        fi
+        echo -e "${GREEN}[OK] Volume created: ${CHOSEN_VOLUMES[$name]}${RESET}"
+    done
+}
+
+# Function to print final summary
 print_summary() {
     echo -e "\n${GREEN}📋 Summary of Changes:${RESET}"
     echo -e "${YELLOW}Created Networks:${RESET}"
     for name in "${DEFAULT_NAMES[@]}"; do
-        if [[ -n "${CREATED_RESOURCES[network_${name}]}" ]]; then
-            echo "  - ${name} → ${CREATED_RESOURCES[network_${name}]}"
-        fi
+        echo "  - ${name} → ${CHOSEN_NETWORKS[$name]}"
     done
     
     echo -e "\n${YELLOW}Created Volumes:${RESET}"
     for name in "${DEFAULT_VOLUMES[@]}"; do
-        if [[ -n "${CREATED_RESOURCES[volume_${name}]}" ]]; then
-            echo "  - ${name} → ${CREATED_RESOURCES[volume_${name}]}"
-        fi
+        echo "  - ${name} → ${CHOSEN_VOLUMES[$name]}"
     done
     
     echo -e "\n${YELLOW}Next Steps:${RESET}"
@@ -135,20 +166,19 @@ echo -e "${YELLOW}🛠️ Configuring Docker for ModMail Bot${RESET}"
 # Check Docker installation
 check_docker
 
-# Print Docker Networks
+# Print current Docker Networks
 echo -e "${YELLOW}[NOTICE] Current Docker Networks:${RESET}"
 docker network ls --format "table {{.Name}}\t{{.Driver}}\t{{.Scope}}\t{{.Internal}}"
 echo ""
 
-# Create Docker Networks
-for i in "${!DEFAULT_NAMES[@]}"; do
-    create_resource "network" "${DEFAULT_NAMES[i]}" "${FALLBACK_NAMES[i]}"
-done
+# Collect all resource names first
+collect_resource_names
 
-# Create Docker Volumes
-for i in "${!DEFAULT_VOLUMES[@]}"; do
-    create_resource "volume" "${DEFAULT_VOLUMES[i]}" "modmail_${DEFAULT_VOLUMES[i]}"
-done
+# Preview and confirm choices
+preview_choices
 
-# Print summary of changes
+# Create all resources
+create_resources
+
+# Print final summary
 print_summary
