@@ -12,15 +12,15 @@ networks:
     external: true
   instance:
     driver: bridge
-    name: private_${BOT_NAME}  
+    name: private_${BOT_NAME:-modmail}
 
 volumes:
   db:
     name: ${DB_VOLUME:-postgres}
   rabbitmq:
-    name: rabbitmq_${BOT_NAME}
+    name: rabbitmq_${BOT_NAME:-modmail}
   redis:
-    name: redis_${BOT_NAME}
+    name: redis_${BOT_NAME:-modmail}
 
 services:
   web:
