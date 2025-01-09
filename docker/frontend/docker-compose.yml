@@ -2,20 +2,29 @@
 #version: '3'
 
 networks:
-  postgres:
-    name: postgres
+  db:
+    name: ${DB_NETWORK}
     external: true
   instance:
     driver: bridge
-    name: modmail_${BOT_NAME}
+    name: private_${BOT_NAME}
+
+volumes:
+  rabbitmq:
+    name: rabbitmq_${BOT_NAME}
+  redis:
+    name: redis_${BOT_NAME}
 
 services:
   bot:
-    build:
-      context: ..
-      dockerfile: docker/bot/Dockerfile
+#    build:
+#      context: ..
+#      dockerfile: docker/bot/Dockerfile
     image: ghcr.io/chamburr/modmail-bot:latest
     restart: unless-stopped
+    networks:
+      - db
+      - instance
     environment:
       - ENVIRONMENT=development
       - BOT_TOKEN=${BOT_TOKEN}
@@ -60,6 +69,8 @@ services:
   dispatch:
     image: ghcr.io/chamburr/twilight-dispatch:latest
     restart: unless-stopped
+    networks:
+      - instance
     environment:
       - RUST_LOG=info
       - BOT_TOKEN=${BOT_TOKEN}
@@ -102,10 +113,15 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    networks:
+      - instance
+    volumes:
+      - redis:/data
 
   rabbitmq:
     image: rabbitmq:3-alpine
     restart: unless-stopped
-
-volumes:
-  postgres:
+    networks:
+      - instance
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq

@@ -1,12 +1,37 @@
 version: '3'
 
+networks:
+  db:
+    name: ${DB_NETWORK:-postgres}
+    external: true
+  backend:
+    name: ${API_NETWORK:-backend}
+    external: true
+  frontend:
+    name: ${WEB_NETWORK:-frontend}
+    external: true
+  instance:
+    driver: bridge
+    name: private_${BOT_NAME}  
+
+volumes:
+  db:
+    name: ${DB_VOLUME:-postgres}
+  rabbitmq:
+    name: rabbitmq_${BOT_NAME}
+  redis:
+    name: redis_${BOT_NAME}
+
 services:
   web:
-    build:
-      context: ..
-      dockerfile: docker/web/Dockerfile
+#    build:
+#      context: ..
+#      dockerfile: docker/web/Dockerfile
     image: ghcr.io/chamburr/modmail-web:latest
     restart: unless-stopped
+    networks:
+      - backend
+      - frontend
     ports:
       - '8000:6000'
     environment:
@@ -19,11 +44,13 @@ services:
       - api
 
   api:
-    build:
-      context: ..
-      dockerfile: docker/api/Dockerfile
+#    build:
+#      context: ..
+#      dockerfile: docker/api/Dockerfile
     image: ghcr.io/chamburr/modmail-api:latest
     restart: unless-stopped
+    networks:
+      - backend
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
       - BOT_CLIENT_ID=${BOT_CLIENT_ID}
@@ -49,11 +76,14 @@ services:
       - redis
 
   bot:
-    build:
-      context: ..
-      dockerfile: docker/bot/Dockerfile
+#    build:
+#      context: ..
+#      dockerfile: docker/bot/Dockerfile
     image: ghcr.io/chamburr/modmail-bot:latest
     restart: unless-stopped
+    networks:
+      - db
+      - instance
     environment:
       - ENVIRONMENT=development
       - BOT_TOKEN=${BOT_TOKEN}
@@ -96,6 +126,8 @@ services:
   dispatch:
     image: ghcr.io/chamburr/twilight-dispatch:latest
     restart: unless-stopped
+    networks:
+      - instance
     environment:
       - RUST_LOG=info
       - BOT_TOKEN=${BOT_TOKEN}
@@ -138,19 +170,27 @@ services:
   postgres:
     image: postgres:15-alpine
     restart: unless-stopped
+    networks:
+      - db
     environment:
       - POSTGRES_DB=modmail
       - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    networks:
+      - backend
+      - instance
+    volumes:
+      - redis:/data
 
   rabbitmq:
     image: rabbitmq:3-alpine
     restart: unless-stopped
-
-volumes:
-  postgres:
+    networks:
+      - instance
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
